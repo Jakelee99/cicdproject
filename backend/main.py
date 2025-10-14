@@ -21,7 +21,7 @@ def create_question(q: Question):
     questions.append(q.content)
     return {"message": "질문이 등록되었습니다", "total_questions": len(questions)}
 
-# 질문 목록 조회 API (GET)
+# 질문 목록 조회API (GET)
 @app.get("/questions")
 def get_questions():
     return {"questions": questions}
