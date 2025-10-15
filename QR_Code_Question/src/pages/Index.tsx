@@ -1,39 +1,50 @@
-import { useState, useEffect } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { SessionHeader } from "@/components/SessionHeader";
 import { QuestionInput } from "@/components/QuestionInput";
 import { QuestionFeed } from "@/components/QuestionFeed";
+import { apiClient } from "@/lib/api";
 
-interface Question {
-  id: string;
+interface ApiQuestion {
+  id: number;
   content: string;
-  timestamp: Date;
-  isNew?: boolean;
+  created_at: string;
 }
 
+const QUESTIONS_QUERY_KEY = ["questions"];
+
 const Index = () => {
-  const [questions, setQuestions] = useState<Question[]>([
-    {
-      id: "1",
-      content: "이 코드의 의미가 뭔가요?",
-      timestamp: new Date(Date.now() - 1000 * 60 * 3),
-    },
-    {
-      id: "2",
-      content: "구현 방법을 좀 더 설명해주실 수 있나요?",
-      timestamp: new Date(Date.now() - 1000 * 60 * 4),
-    },
-    {
-      id: "3",
-      content: "라이브러리 설치가 왜 필요한가요?",
-      timestamp: new Date(Date.now() - 1000 * 60 * 5),
-    },
-    {
-      id: "4",
-      content: "이번 개발 도구를 사용하나요?",
-      timestamp: new Date(Date.now() - 1000 * 60 * 6),
-    },
-  ]);
   const [isConnected, setIsConnected] = useState(true);
+  const queryClient = useQueryClient();
+
+  const { data, isLoading, isError } = useQuery({
+    queryKey: QUESTIONS_QUERY_KEY,
+    queryFn: async () => {
+      const response = await apiClient.get<ApiQuestion[]>("/questions");
+      return response.data;
+    },
+    refetchOnWindowFocus: false,
+  });
+
+  const createQuestionMutation = useMutation({
+    mutationFn: async (content: string) => {
+      await apiClient.post("/questions", { content });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUESTIONS_QUERY_KEY });
+    },
+  });
+
+  const questions = useMemo(
+    () =>
+      (data ?? []).map((question, index) => ({
+        id: question.id.toString(),
+        content: question.content,
+        timestamp: new Date(question.created_at),
+        isNew: index === 0,
+      })),
+    [data]
+  );
 
   useEffect(() => {
     // Simulate connection status
@@ -45,23 +56,7 @@ const Index = () => {
   }, []);
 
   const handleSubmitQuestion = async (content: string) => {
-    const newQuestion: Question = {
-      id: Date.now().toString(),
-      content,
-      timestamp: new Date(),
-      isNew: true,
-    };
-
-    setQuestions((prev) => [newQuestion, ...prev]);
-
-    // Remove "new" status after animation
-    setTimeout(() => {
-      setQuestions((prev) =>
-        prev.map((q) =>
-          q.id === newQuestion.id ? { ...q, isNew: false } : q
-        )
-      );
-    }, 2000);
+    await createQuestionMutation.mutateAsync(content);
   };
 
   return (
@@ -74,11 +69,18 @@ const Index = () => {
       <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 h-full">
           <div className="bg-card rounded-2xl border border-border p-6 lg:p-8 shadow-sm">
-            <QuestionInput onSubmit={handleSubmitQuestion} />
+            <QuestionInput
+              onSubmit={handleSubmitQuestion}
+              isSubmitting={createQuestionMutation.isPending}
+            />
           </div>
           
           <div className="bg-card rounded-2xl border border-border p-6 lg:p-8 shadow-sm">
-            <QuestionFeed questions={questions} />
+            <QuestionFeed
+              questions={questions}
+              isLoading={isLoading}
+              isError={isError}
+            />
           </div>
         </div>
       </main>

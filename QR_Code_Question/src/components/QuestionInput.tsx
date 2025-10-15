@@ -5,12 +5,12 @@ import { toast } from "sonner";
 import { Check } from "lucide-react";
 
 interface QuestionInputProps {
-  onSubmit: (question: string) => void;
+  onSubmit: (question: string) => Promise<void>;
+  isSubmitting?: boolean;
 }
 
-export const QuestionInput = ({ onSubmit }: QuestionInputProps) => {
+export const QuestionInput = ({ onSubmit, isSubmitting = false }: QuestionInputProps) => {
   const [question, setQuestion] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,18 +20,14 @@ export const QuestionInput = ({ onSubmit }: QuestionInputProps) => {
       return;
     }
 
-    setIsSubmitting(true);
-    
     try {
-      await onSubmit(question);
+      await onSubmit(question.trim());
       toast.success("질문이 등록되었습니다", {
         icon: <Check className="h-4 w-4" />,
       });
       setQuestion("");
     } catch (error) {
       toast.error("질문 등록에 실패했습니다");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
