@@ -3,8 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from . import models
-from .database import SessionLocal, engine
+from backend import models
+from backend.database import SessionLocal, engine
 
 # DB 테이블 생성
 models.Base.metadata.create_all(bind=engine)
@@ -18,10 +18,10 @@ origins = [
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins, # 허용된 origin만 접근 가능
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["*"], # 모든 HTTP 메서드 허용(Get, Post 등)
+    allow_headers=["*"], # 모든 헤더 허용
 )
 
 # 의존성 주입 (DB 세션)
