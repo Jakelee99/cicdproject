@@ -41,7 +41,7 @@ export const QuestionInput = ({ onSubmit, isSubmitting = false }: QuestionInputP
         <Textarea
           value={question}
           onChange={(e) => setQuestion(e.target.value)}
-          placeholder="질문이 들록하겠요"
+          placeholder="Ex) 클라우드 컴퓨팅이란 무엇인가요?"
           className="flex-1 resize-none text-base p-4 min-h-[200px] rounded-xl border-2 border-input focus:border-primary transition-colors"
           disabled={isSubmitting}
         />
