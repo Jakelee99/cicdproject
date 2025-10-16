@@ -17,7 +17,7 @@ app = FastAPI(title="QR Code Question API")
 
 # CORS 설정 (React 앱과 통신 허용)
 origins = [
-    "http://localhost:5173",  # React 개발 서버
+    "http://localhost:5173",  #React 개발 서버
     "http://127.0.0.1:5173",
 ]
 
