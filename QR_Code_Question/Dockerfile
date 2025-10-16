@@ -8,7 +8,7 @@ RUN npm install
 COPY . .
 
 # 환경 변수 (백엔드 API 주소)
-ENV VITE_API_URL=http://localhost:8000
+ENV VITE_API_URL=http://43.202.252.37:8000
 
 RUN npm run build
 
