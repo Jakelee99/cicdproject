@@ -3,8 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from backend import models
-from backend.database import SessionLocal, engine
+try:
+    from backend import models
+    from backend.database import SessionLocal, engine
+except ImportError:
+    import models  # type: ignore
+    from database import SessionLocal, engine  # type: ignore
 
 # DB 테이블 생성
 models.Base.metadata.create_all(bind=engine)
@@ -13,15 +17,16 @@ app = FastAPI(title="QR Code Question API")
 
 # CORS 설정 (React 앱과 통신 허용)
 origins = [
-    "http://localhost:5173", # React 개발 서버
+    "http://localhost:5173",  # React 개발 서버
+    "http://127.0.0.1:5173",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins, # 허용된 origin만 접근 가능
+    allow_origins=origins,  # 허용된 origin만 접근 가능
     allow_credentials=True,
-    allow_methods=["*"], # 모든 HTTP 메서드 허용(Get, Post 등)
-    allow_headers=["*"], # 모든 헤더 허용
+    allow_methods=["*"],  # 모든 HTTP 메서드 허용(Get, Post 등)
+    allow_headers=["*"],  # 모든 헤더 허용
 )
 
 # 의존성 주입 (DB 세션)

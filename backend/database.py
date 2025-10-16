@@ -1,10 +1,12 @@
-# DB 연결 설정
+from pathlib import Path
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-# SQLite 데이터베이스 연결 URL
-SQLALCHEMY_DATABASE_URL = "sqlite:///./backend/data.db"
+BASE_DIR = Path(__file__).resolve().parent
+DB_PATH = BASE_DIR / "data.db"
+SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
 
 # 엔진생성(DB 파일 연결)
 # engine : DB와 실제 연결을 관리

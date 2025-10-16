@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  backend:
+    build: ./backend
+    container_name: fastapi_app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app # 코드 수정시 자동 반영(개발시편리)
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  frontend:
+    build: ./QR_Code_Question
+    container_name: react_app
+    ports:
+      - "5173:80" # 외부에서 http:/localhost:5173 접근
+    depends_on:
+      - backend
+    environment:
+      - VITE_API_URL=http://backend:8000
