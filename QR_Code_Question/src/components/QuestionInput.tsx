@@ -34,7 +34,7 @@ export const QuestionInput = ({ onSubmit, isSubmitting = false }: QuestionInputP
   return (
     <div className="flex flex-col h-full">
       <div className="mb-6">
-        <h2 className="text-2xl font-bold text-foreground">무엇이 궁금한가요?</h2>
+        <h2 className="text-2xl font-bold text-foreground">무엇이 궁금해요?</h2>
       </div>
       
       <form onSubmit={handleSubmit} className="flex flex-col flex-1">
