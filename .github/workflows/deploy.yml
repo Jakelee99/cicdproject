@@ -21,6 +21,6 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/cicdproject
-            git pull
+            git pull origin main
             docker compose down
             docker compose up --build -d
