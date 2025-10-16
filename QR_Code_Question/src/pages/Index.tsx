@@ -62,7 +62,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background flex flex-col">
       <SessionHeader 
-        sessionName="소프트웨어 공학 Q&A" 
+        sessionName="클라우드 Q&A" 
         isConnected={isConnected}
       />
       
