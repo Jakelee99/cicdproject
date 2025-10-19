@@ -19,7 +19,8 @@ app = FastAPI(title="QR Code Question API")
 origins = [
     "http://localhost:5173",  #React 개발 서버
     "http://127.0.0.1:5173",
-    "http://3.39.242.66:5173"
+    "http://3.39.242.66:5173",
+    "http://3.39.242.66"
 ]
 
 app.add_middleware(
