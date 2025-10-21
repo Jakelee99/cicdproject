@@ -57,7 +57,8 @@ jobs:
             docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
             export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
             cd /home/${{ secrets.EC2_USER }}/cicdproject
-            git pull origin main
+            git fetch origin main
+            git reset --hard origin/main
             docker compose down
             docker compose pull
             docker image prune -f
