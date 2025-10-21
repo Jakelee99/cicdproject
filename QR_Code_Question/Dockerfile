@@ -1,9 +1,10 @@
 # 1단계: React 앱 빌드
 FROM node:18-alpine AS build
 
+ENV NODE_ENV=production
 WORKDIR /app
 COPY package.json package-lock.json* bun.lockb* ./
-RUN npm install
+RUN npm ci
 
 COPY . .
 

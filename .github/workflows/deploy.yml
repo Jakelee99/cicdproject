@@ -1,27 +1,62 @@
-name: Deploy to EC2
+name: Build and Deploy
 
 on:
   push:
     branches:
       - main
 
+env:
+  BACKEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/qr-question-backend
+  FRONTEND_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/qr-question-frontend
+
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: SSH into EC2 & Deploy
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build & Push Backend Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.BACKEND_IMAGE }}:latest
+            ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+
+      - name: Build & Push Frontend Image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./QR_Code_Question
+          file: ./QR_Code_Question/Dockerfile
+          push: true
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}:latest
+            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.EC2_HOST }}
-          username: ubuntu
+          username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
           script: |
-            cd ~/cicdproject
+            docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
+            cd /home/${{ secrets.EC2_USER }}/cicdproject
             git pull origin main
             docker compose down
-            docker compose build --no-cache
+            docker compose pull
             docker compose up -d
