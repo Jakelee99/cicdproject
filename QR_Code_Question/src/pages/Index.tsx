@@ -16,6 +16,14 @@ const QUESTIONS_QUERY_KEY = ["questions"];
 const Index = () => {
   const [isConnected, setIsConnected] = useState(true);
   const queryClient = useQueryClient();
+  const sessionUrl = useMemo(() => {
+    if (typeof window === "undefined") {
+      return "http://localhost:5173";
+    }
+    const url = new URL(window.location.href);
+    url.hash = "";
+    return url.toString();
+  }, []);
 
   const { data, isLoading, isError } = useQuery({
     queryKey: QUESTIONS_QUERY_KEY,
@@ -71,6 +79,7 @@ const Index = () => {
       <SessionHeader 
         sessionName="클라우드 Q&A" 
         isConnected={isConnected}
+        sessionUrl={sessionUrl}
       />
       
       <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
