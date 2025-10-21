@@ -166,12 +166,10 @@ cicdproject/
 
 ## 🎨 Features Preview
 
-| QR 세션 공유                            |
-| --------------------------------------- | -------------- | --- |
-| ![QR Dialog](./README_image/qr.png)     |
-| 질문 목록 UI                            |
-| <!--                                    | -------------- | --> |
-| ![Question Feed](./README_image/ui.png) |
+| QR 세션 공유 |
+ ![QR Dialog](./README_image/qr.png) 
+| 질문 목록 UI |
+ ![Question Feed](./README_image/ui.png) 
 
 ---
 
