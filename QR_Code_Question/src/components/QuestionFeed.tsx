@@ -1,10 +1,12 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Clock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle2, Clock, Undo2 } from "lucide-react";
 
 interface Question {
   id: string;
   content: string;
   timestamp: Date;
+  isResolved: boolean;
   isNew?: boolean;
 }
 
@@ -12,12 +14,16 @@ interface QuestionFeedProps {
   questions: Question[];
   isLoading?: boolean;
   isError?: boolean;
+  onToggleResolved: (id: string, currentValue: boolean) => Promise<void>;
+  isUpdating?: boolean;
 }
 
 export const QuestionFeed = ({
   questions,
   isLoading = false,
   isError = false,
+  onToggleResolved,
+  isUpdating = false,
 }: QuestionFeedProps) => {
   const formatTime = (date: Date) => {
     return new Intl.DateTimeFormat("ko-KR", {
@@ -59,18 +65,47 @@ export const QuestionFeed = ({
                 <div
                   key={q.id}
                   className={`p-4 rounded-xl border ${
-                    q.isNew || index === 0
-                      ? "question-card-new border-accent-foreground/20"
-                      : "question-card border-border"
+                    q.isResolved
+                      ? "border-success text-muted-foreground bg-success/10"
+                      : q.isNew || index === 0
+                        ? "question-card-new border-accent-foreground/20"
+                        : "question-card border-border"
                   } slide-up`}
                   style={{ animationDelay: `${index * 0.05}s` }}
                 >
-                  <p className="text-base text-foreground mb-2 whitespace-pre-wrap">
+                  <p
+                    className={`text-base mb-2 whitespace-pre-wrap ${
+                      q.isResolved ? "line-through text-muted-foreground" : "text-foreground"
+                    }`}
+                  >
                     {q.content}
                   </p>
-                  <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <Clock className="h-3.5 w-3.5" />
-                    <span>{formatTime(q.timestamp)}</span>
+
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <Clock className="h-3.5 w-3.5" />
+                      <span>{formatTime(q.timestamp)}</span>
+                    </div>
+
+                    <Button
+                      variant={q.isResolved ? "outline" : "default"}
+                      size="sm"
+                      disabled={isUpdating}
+                      onClick={() => onToggleResolved(q.id, q.isResolved)}
+                      className="flex items-center gap-1.5"
+                    >
+                      {q.isResolved ? (
+                        <>
+                          <Undo2 className="h-4 w-4" />
+                          되돌리기
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle2 className="h-4 w-4" />
+                          해결 완료
+                        </>
+                      )}
+                    </Button>
                   </div>
                 </div>
               ))

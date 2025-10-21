@@ -2,7 +2,7 @@ from datetime import datetime, time, timedelta, timezone
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from fastapi import Depends, FastAPI
+from fastapi import Depends, FastAPI, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -50,6 +50,20 @@ class QuestionCreate(BaseModel):
     content: str
 
 
+class QuestionResponse(BaseModel):
+    id: int
+    content: str
+    is_resolved: bool
+    created_at: datetime
+
+    class Config:
+        orm_mode = True
+
+
+class QuestionStatusUpdate(BaseModel):
+    is_resolved: bool
+
+
 KST = timezone(timedelta(hours=9))
 
 
@@ -79,6 +93,8 @@ def run_scheduled_cleanup() -> None:
 @app.on_event("startup")
 def start_scheduler() -> None:
     # 컨테이너가 새로 올라올 때마다 모든 질문을 초기화
+    models.Base.metadata.drop_all(bind=engine)
+    models.Base.metadata.create_all(bind=engine)
     db = SessionLocal()
     try:
         db.query(models.Question).delete(synchronize_session=False)
@@ -107,21 +123,39 @@ def health_check():
     return {"status": "ok"}
 
 # 질문등록 (Post)
-@app.post("/questions")
+@app.post("/questions", response_model=QuestionResponse, status_code=status.HTTP_201_CREATED)
 def create_question(question: QuestionCreate, db: Session = Depends(get_db)):
     prune_old_questions(db)
     new_question = models.Question(content=question.content)
     db.add(new_question)
     db.commit()
     db.refresh(new_question)
-    return {"message": "질문이 등록되었습니다", "id": new_question.id}
+    return new_question
 
 # 질문목록(Get)
-@app.get("/questions")
+@app.get("/questions", response_model=list[QuestionResponse])
 def get_questions(db: Session = Depends(get_db)):
     prune_old_questions(db)
     questions = db.query(models.Question).order_by(models.Question.created_at.desc()).all()
-    return [
-        {"id": q.id, "content": q.content, "created_at": q.created_at}
-        for q in questions
-    ]
+    return questions
+
+
+@app.patch("/questions/{question_id}", response_model=QuestionResponse)
+def update_question_status(
+    question_id: int,
+    payload: QuestionStatusUpdate,
+    db: Session = Depends(get_db),
+):
+    question = (
+        db.query(models.Question)
+        .filter(models.Question.id == question_id)
+        .first()
+    )
+
+    if question is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Question not found")
+
+    question.is_resolved = payload.is_resolved
+    db.commit()
+    db.refresh(question)
+    return question

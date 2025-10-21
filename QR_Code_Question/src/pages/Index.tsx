@@ -9,6 +9,7 @@ interface ApiQuestion {
   id: number;
   content: string;
   created_at: string;
+  is_resolved: boolean;
 }
 
 const QUESTIONS_QUERY_KEY = ["questions"];
@@ -55,6 +56,7 @@ const Index = () => {
           id: question.id.toString(),
           content: question.content,
           timestamp: kstTimestamp,
+          isResolved: question.is_resolved,
           isNew: index === 0,
         };
       }),
@@ -72,6 +74,19 @@ const Index = () => {
 
   const handleSubmitQuestion = async (content: string) => {
     await createQuestionMutation.mutateAsync(content);
+  };
+
+  const updateQuestionStatusMutation = useMutation({
+    mutationFn: async ({ id, isResolved }: { id: string; isResolved: boolean }) => {
+      await apiClient.patch(`/questions/${id}`, { is_resolved: isResolved });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: QUESTIONS_QUERY_KEY });
+    },
+  });
+
+  const handleToggleResolved = async (id: string, currentValue: boolean) => {
+    await updateQuestionStatusMutation.mutateAsync({ id, isResolved: !currentValue });
   };
 
   return (
@@ -96,6 +111,8 @@ const Index = () => {
               questions={questions}
               isLoading={isLoading}
               isError={isError}
+              onToggleResolved={handleToggleResolved}
+              isUpdating={updateQuestionStatusMutation.isPending}
             />
           </div>
         </div>

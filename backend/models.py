@@ -1,7 +1,7 @@
 # 테이블 모델 정의
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Integer, String
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
 
 try:
     from backend.database import Base
@@ -16,6 +16,7 @@ class Question(Base):
     # DB 컬럼 정의
     id = Column(Integer, primary_key=True, index=True)
     content = Column(String, nullable=False)
+    is_resolved = Column(Boolean, default=False, nullable=False)
     
     # 기본생성시간 자동 기록
     created_at = Column(DateTime, default=datetime.utcnow)
