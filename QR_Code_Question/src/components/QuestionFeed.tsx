@@ -21,9 +21,11 @@ export const QuestionFeed = ({
 }: QuestionFeedProps) => {
   const formatTime = (date: Date) => {
     return new Intl.DateTimeFormat("ko-KR", {
+      timeZone: "Asia/Seoul",
+      month: "2-digit",
+      day: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
-      hour12: true,
     }).format(date);
   };
 

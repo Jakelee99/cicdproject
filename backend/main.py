@@ -78,6 +78,14 @@ def run_scheduled_cleanup() -> None:
 
 @app.on_event("startup")
 def start_scheduler() -> None:
+    # 컨테이너가 새로 올라올 때마다 모든 질문을 초기화
+    db = SessionLocal()
+    try:
+        db.query(models.Question).delete(synchronize_session=False)
+        db.commit()
+    finally:
+        db.close()
+
     if not scheduler.running:
         scheduler.add_job(
             run_scheduled_cleanup,

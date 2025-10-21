@@ -37,12 +37,19 @@ const Index = () => {
 
   const questions = useMemo(
     () =>
-      (data ?? []).map((question, index) => ({
-        id: question.id.toString(),
-        content: question.content,
-        timestamp: new Date(question.created_at),
-        isNew: index === 0,
-      })),
+      (data ?? []).map((question, index) => {
+        const utcDate = new Date(question.created_at);
+        const kstTimestamp = new Date(
+          utcDate.getTime() + 9 * 60 * 60 * 1000
+        );
+
+        return {
+          id: question.id.toString(),
+          content: question.content,
+          timestamp: kstTimestamp,
+          isNew: index === 0,
+        };
+      }),
     [data]
   );
 
