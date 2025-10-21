@@ -55,6 +55,7 @@ jobs:
           script_stop: true
           script: |
             docker login -u "${{ secrets.DOCKERHUB_USERNAME }}" -p "${{ secrets.DOCKERHUB_TOKEN }}"
+            export DOCKERHUB_USERNAME=${{ secrets.DOCKERHUB_USERNAME }}
             cd /home/${{ secrets.EC2_USER }}/cicdproject
             git pull origin main
             docker compose down
